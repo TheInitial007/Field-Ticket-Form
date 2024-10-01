@@ -508,7 +508,6 @@
                             <option value="" disabled selected>Select shift</option>
                             <option value="Day">Day</option>
                             <option value="Night">Night</option>
-                            <option value="N/A">N/A</option>
                         </select>
                     </td>
                 </tr>
@@ -693,13 +692,6 @@
         });
     </script>
     
-    
-    
-    
-    
-    
-    
-
             <!-- Submit Button -->
     <form id="fieldTicketForm" action="https://formspree.io/f/xgvwjkkn" method="POST">
         <!-- Additional form fields go here if needed -->
@@ -711,8 +703,7 @@
         <button id="generatePDF" class="btn btn-success">Download PDF</button>
     </div>
 
-    <!-- Add script for handling PDF generation -->
-    <script>
+   <script>
         // Function to update total values
         function updateTotal() {
             const unitInputs = document.querySelectorAll('.units'); // Get all unit inputs
@@ -733,7 +724,18 @@
         // Handle PDF generation
         document.getElementById('generatePDF').addEventListener('click', () => {
             const element = document.getElementById('formContent'); // Get the form content
-            html2pdf().from(element).save(); // Generate and download PDF
+
+            // Configure html2pdf options for proper PDF rendering
+            const opt = {
+                margin:       0.5,
+                filename:     'field_ticket_form.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            // Generate and save the PDF
+            html2pdf().set(opt).from(element).save();
         });
     </script>
 
