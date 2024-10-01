@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test PDF Generation</title>
+    <!-- Add the html2pdf.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+    <!-- Content to Generate PDF From -->
+    <div id="contentToPrint">
+        <h1>Hello, this is a test PDF content!</h1>
+        <p>This is a simple paragraph to test if the PDF generation is working properly.</p>
+    </div>
+
+    <!-- PDF Generation Button -->
+    <button id="generatePDF" class="btn btn-success">Download PDF</button>
+
+    <!-- JavaScript for PDF Generation -->
+    <script>
+        document.getElementById('generatePDF').addEventListener('click', function() {
+            const element = document.getElementById('contentToPrint'); // Select the element to print
+            const options = {
+                margin: 0.5,
+                filename: 'test.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().set(options).from(element).save(); // Generate and save the PDF
+        });
+    </script>
+
+</body>
+</html>
