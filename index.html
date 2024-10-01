@@ -677,6 +677,12 @@
                 input.addEventListener('change', calculateTotalHours);    // Add new event listener
             });
         }
+
+        // Function to reset shift dropdown to placeholder state
+        function resetShift(button) {
+            const selectElement = button.previousElementSibling;
+            selectElement.value = ""; // Reset the dropdown to its default (placeholder) value
+        }
     
         // Add event listeners on page load
         document.addEventListener('DOMContentLoaded', function() {
