@@ -160,14 +160,16 @@
             overflow: hidden; /* Prevent overflowing content */
         }
 
-        textarea {
+        textarea.form-control {
             box-sizing: border-box;
             width: 100%; /* Extend to full width */
+            max-width: 100%
             min-height: 200px; /* Increase the minimum height */
+            height: auto; /* Automatically adjust height based on content */
             white-space: pre-wrap;
             word-wrap: break-word;
             overflow-wrap: break-word;
-            overflow: hidden; /* Prevent scrolling */
+            resize: vertical;
         }    
     </style>
 </head>
@@ -768,14 +770,18 @@
 
         // PDF generation
         document.getElementById('generatePDF').addEventListener('click', () => {
-            const element = document.getElementById('fieldTicketForm'); // Get the form content
-
+            const element = document.getElementById('fieldTicketForm'); // Get the form content 
+            
         // Configure html2pdf options for proper PDF rendering
             const opt = {
                 margin: 0.5,
                 filename: 'field_ticket_form.pdf',
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, scrollY: 0 }, // Ensure full content is captured
+                html2canvas: { 
+                    scale: 2, 
+                    scrollY: 0,  // Ensure content that is scrolled within the textarea is captured
+                    useCORS: true // Fix cross-origin issues if any
+                },
                 jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
 
@@ -783,6 +789,15 @@
         html2pdf().set(opt).from(element).save();
     });
 
+    </script>
+
+    <script>
+        document.querySelectorAll('textarea').forEach(textarea => {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto'; // Reset the height to auto
+                this.style.height = (this.scrollHeight) + 'px'; // Adjust height based on content
+            });
+        });
     </script>
     
     <!-- Bootstrap JS (optional) -->
