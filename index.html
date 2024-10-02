@@ -777,9 +777,13 @@
             document.getElementById('generatePDF').addEventListener('click', () => {
         // Ensure all textareas expand to show full content
             document.querySelectorAll('textarea').forEach(textarea => {
-                textarea.style.overflow = 'visible'; // Force overflow to be visible
-                textarea.style.height = 'auto'; // Reset height to auto
-                textarea.style.height = textarea.scrollHeight + 'px'; // Adjust height based on content
+                const content = textarea.value; // Get textarea content
+                const textDiv = document.createElement('div'); // Create a div to replace textarea
+                textDiv.style.whiteSpace = 'pre-wrap'; // Preserve line breaks and whitespace
+                textDiv.style.border = '1px solid #ced4da'; // Add a border to match textarea styling
+                textDiv.style.padding = '5px'; // Add padding to match the textarea
+                textDiv.textContent = content; // Set the div's text content to the textarea value
+                textarea.replaceWith(textDiv); // Replace textarea with the div
             });
 
             const element = document.getElementById('fieldTicketForm'); // Get form content
@@ -791,16 +795,23 @@
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { 
                     scale: 2, 
-                    scrollY: 0,  // Ensure scrolled content is captured
-                    logging: true, // Enable logging for debugging
-                    useCORS: true, // Handle external resources
-                    allowTaint: true, // Bypass security for cross-origin content
+                    scrollY: 0,  // Ensure content that is scrolled within the textarea is captured
+                    useCORS: true, 
+                    logging: true
                 },
                 jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
 
             // Generate and save the PDF
-            html2pdf().set(opt).from(element).save();
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Convert divs back to textareas after the PDF is generated
+                document.querySelectorAll('div[style*="white-space"]').forEach(div => {
+                    const textarea = document.createElement('textarea');
+                    textarea.className = 'form-control'; // Reapply the textarea class
+                    textarea.value = div.textContent; // Set the value back from div
+                    div.replaceWith(textarea); // Replace the div with the original textarea
+                });
+            });
         });
     </script>
 
