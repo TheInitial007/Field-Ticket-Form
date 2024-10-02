@@ -15,10 +15,17 @@
             padding: 20px;
         }
 
-        /* Avoid cutting tables or sections by page breaks */
-        table, .container, .header-container {
+        /* Prevent rows from breaking across pages */
+        table, tr, td, th {
+            page-break-inside: avoid; /* Ensure rows, cells, and headers don't break across pages */
+            page-break-after: auto;    /* Allow page breaks after rows if necessary */
+        }
+
+        /* Avoid cutting sections or containers by page breaks */
+        .container, .header-container {
             page-break-inside: avoid;
         }
+
 
         /* Force a page break after this class */
         .page-break {
