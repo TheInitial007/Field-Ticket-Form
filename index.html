@@ -162,14 +162,16 @@
 
         textarea.form-control {
             box-sizing: border-box;
-            width: 100%; /* Extend to full width */
-            max-width: 100%
-            height: auto; /* Automatically adjust height based on content */
-            white-space: pre-wrap;
+            width: 100%; /* Full width */
+            height: auto; /* Auto height based on content */
+            min-height: 50px; /* Ensure minimum height */
+            max-height: none; /* Disable max height restrictions */
+            white-space: pre-wrap; /* Preserve white spaces */
+            overflow: visible !important; /* Force overflow to be visible */
             word-wrap: break-word;
-            overflow-wrap: break-word;
-            resize: none;
-        }    
+            resize: none; /* Disable manual resizing */
+        }
+    
     </style>
 </head>
 <body>
@@ -772,26 +774,27 @@
 
 
         // PDF generation
-        document.getElementById('generatePDF').addEventListener('click', () => {
-            // Ensure all textareas are resized to show full content
+            document.getElementById('generatePDF').addEventListener('click', () => {
+        // Ensure all textareas expand to show full content
             document.querySelectorAll('textarea').forEach(textarea => {
-                textarea.style.height = 'auto'; // Reset the height to auto
+                textarea.style.overflow = 'visible'; // Force overflow to be visible
+                textarea.style.height = 'auto'; // Reset height to auto
                 textarea.style.height = textarea.scrollHeight + 'px'; // Adjust height based on content
             });
 
-            const element = document.getElementById('fieldTicketForm'); // Get the form content 
+            const element = document.getElementById('fieldTicketForm'); // Get form content
 
-            // Configure html2pdf options for proper PDF rendering
+        // Configure html2pdf options
             const opt = {
                 margin: 0.5,
                 filename: 'field_ticket_form.pdf',
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { 
                     scale: 2, 
-                    scrollY: 0,  // Ensure content that is scrolled within the textarea is captured
-                    useCORS: true,
-                    logging: true, // Enable logging to debug content capture
-                    allowTaint: true // If cross-origin resources exist, bypass security
+                    scrollY: 0,  // Ensure scrolled content is captured
+                    logging: true, // Enable logging for debugging
+                    useCORS: true, // Handle external resources
+                    allowTaint: true, // Bypass security for cross-origin content
                 },
                 jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
@@ -799,7 +802,6 @@
             // Generate and save the PDF
             html2pdf().set(opt).from(element).save();
         });
-
     </script>
 
     <script>
