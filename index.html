@@ -15,6 +15,16 @@
             padding: 20px;
         }
 
+        /* Avoid cutting tables or sections by page breaks */
+        table, .container, .header-container {
+            page-break-inside: avoid;
+        }
+
+        /* Force a page break after this class */
+        .page-break {
+            page-break-after: always;
+        }
+
         /* Header Styling */
         .header-container {
             display: grid;
