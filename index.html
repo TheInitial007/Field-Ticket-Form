@@ -66,8 +66,7 @@
         .header-left p:first-of-type {
             margin-top: 0.2rem; /* Reduce space above "PO Box" */
         }
-
-
+        
         .header-middle label, .header-right label {
             font-weight: bold;
         }
@@ -139,6 +138,26 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Adjust column widths */
+        #payrollTable th:nth-child(2), 
+        #payrollTable td:nth-child(2) {
+            width: 35%; /* Increase width of the "Name" column */
+        }
+    
+        #payrollTable th:nth-child(3),
+        #payrollTable td:nth-child(3),
+        #payrollTable th:nth-child(4),
+        #payrollTable td:nth-child(4) {
+            width: 15%; /* Decrease width of the "Time" columns */
+        }
+
+        /* Make the input field text wrap */
+        input.form-control {
+            white-space: normal; /* Enable wrapping */
+            word-wrap: break-word; /* Wrap long words if needed */
+            overflow: hidden; /* Prevent overflowing content */
         }
       
     </style>
