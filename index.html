@@ -143,14 +143,14 @@
         /* Adjust column widths */
         #payrollTable th:nth-child(2), 
         #payrollTable td:nth-child(2) {
-            width: 35%; /* Increase width of the "Name" column */
+            width: 45%; /* Increase width of the "Name" column */
         }
     
         #payrollTable th:nth-child(3),
         #payrollTable td:nth-child(3),
         #payrollTable th:nth-child(4),
         #payrollTable td:nth-child(4) {
-            width: 15%; /* Decrease width of the "Time" columns */
+            width: 10%; /* Decrease width of the "Time" columns */
         }
 
         /* Make the input field text wrap */
@@ -164,12 +164,11 @@
             box-sizing: border-box;
             width: 100%; /* Extend to full width */
             max-width: 100%
-            min-height: 2rem; /* Increase the minimum height */
             height: auto; /* Automatically adjust height based on content */
             white-space: pre-wrap;
             word-wrap: break-word;
             overflow-wrap: break-word;
-            resize: vertical;
+            resize: none;
         }    
     </style>
 </head>
@@ -761,12 +760,16 @@
         
          // Function to auto-resize textarea based on content
         document.querySelectorAll('textarea').forEach(textarea => {
-            textarea.setAttribute('style', 'height:' + (textarea.scrollHeight) + 'px;overflow-y:hidden;');
+            textarea.style.overflowY = 'hidden'; // Hide vertical scrollbar
+            textarea.style.height = 'auto'; // Reset to auto
+            textarea.style.height = textarea.scrollHeight + 'px'; // Set height based on scroll height
+
             textarea.addEventListener('input', function() {
-                this.style.height = 'auto'; // Reset the height
-                this.style.height = (this.scrollHeight) + 'px'; // Set height based on content
+                this.style.height = 'auto'; // Reset the height to auto to allow for shrink
+                this.style.height = this.scrollHeight + 'px'; // Adjust height based on content
             });
         });
+
 
         // PDF generation
         document.getElementById('generatePDF').addEventListener('click', () => {
@@ -780,10 +783,13 @@
                 html2canvas: { 
                     scale: 2, 
                     scrollY: 0,  // Ensure content that is scrolled within the textarea is captured
-                    useCORS: true // Fix cross-origin issues if any
+                    useCORS: true,
+                    logging: true, // Enable logging to debug content capture
+                    allowTaint: true // If cross-origin resources exist, bypass security
                 },
                 jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
+
 
         // Generate and save the PDF
         html2pdf().set(opt).from(element).save();
