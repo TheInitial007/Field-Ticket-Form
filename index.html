@@ -159,6 +159,14 @@
             word-wrap: break-word; /* Wrap long words if needed */
             overflow: hidden; /* Prevent overflowing content */
         }
+
+        textarea {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-wrap; /* Preserve line breaks */
+            overflow: hidden; /* Prevent scrolling */
+            width: 100%; /* Ensure it stretches across the available width */
+        }
       
     </style>
 </head>
@@ -752,18 +760,24 @@
         document.getElementById('generatePDF').addEventListener('click', () => {
             const element = document.getElementById('fieldTicketForm'); // Get the form content
 
-            // Configure html2pdf options for proper PDF rendering
+        // Configure html2pdf options for proper PDF rendering
             const opt = {
-                margin:       0.5,
-                filename:     'field_ticket_form.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+                margin: 0.5,
+                filename: 'field_ticket_form.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: {
+                    scale: 2, // Increase the scale for better quality
+                    useCORS: true, // Enable CORS for loading external images
+                    logging: true, // Enable for debugging if needed
+                    allowTaint: true, // Allow cross-origin images
+                },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
 
-            // Generate and save the PDF
-            html2pdf().set(opt).from(element).save();
-        });
+        // Generate and save the PDF
+        html2pdf().set(opt).from(element).save();
+    });
+
     </script>
 
    <!-- Separate Form Submission Code -->
