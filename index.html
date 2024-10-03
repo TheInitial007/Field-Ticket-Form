@@ -726,7 +726,13 @@
                         const start = new Date(`1970-01-01T${startTime}:00`);
                         const end = new Date(`1970-01-01T${endTime}:00`);
                         const hoursWorked = (end - start) / (1000 * 60 * 60); // Calculate difference in hours
-    
+
+                        if (end<start){
+                            end.setDate(end.getDate()+1);
+                        }
+
+                        const hoursWorked = (end - start) / (1000*60*60);
+                        
                         totalHoursCell.textContent = hoursWorked > 0 ? hoursWorked.toFixed(2) : 0; // Display total hours, or 0 if invalid
                     } else {
                         totalHoursCell.textContent = 0; // If no time entered, set total hours to 0
