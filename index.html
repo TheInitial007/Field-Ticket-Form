@@ -229,7 +229,7 @@
                 <label for="ticket">Ticket #:</label>
                 <input type="text" id="ticket" placeholder="Enter Ticket #">
                 <label for="rig">RIG #:</label>
-                <select id="rig" class="form-control">
+                    <select id="rig" class="form-control">
                     <option value="" disabled selected>Select Rig</option>
                     <option value="Rig3">Rig 3</option>
                     <option value="Rig4">Rig 4</option>
@@ -787,6 +787,14 @@
 
         // PDF generation
             document.getElementById('generatePDF').addEventListener('click', () => {
+                // Retrieve the user inputs for "Customer", "Ticket #", and "Rig #"
+                const customer = document.getElementById('customer').value.trim() || 'Customer'; // Get customer name, fallback to 'Customer' if empty
+                const ticketNumber = document.getElementById('ticket').value.trim() || 'Ticket'; // Get ticket number, fallback to 'Ticket' if empty
+                const rigNumber = document.getElementById('rig').value.trim() || 'Rig'; // Get rig number, fallback to 'Rig' if empty
+
+                // Construct the filename using customer, ticket number, and rig number
+                const filename = `${customer}_${ticketNumber}_${rigNumber}_.pdf`.replace(/\s+/g, '_'); // Replace spaces with underscores
+                
         // Ensure all textareas expand to show full content
             document.querySelectorAll('textarea').forEach(textarea => {
                 const content = textarea.value; // Get textarea content
