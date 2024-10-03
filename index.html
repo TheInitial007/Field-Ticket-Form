@@ -440,7 +440,7 @@
                     <td>$200.00</td>
                     <td class="total">$0.00</td>
                 </tr>
-                <tr class="page-break">
+                <tr>
                     <td colspan="3" style="text-align: right; font-weight: bold;">FIELD TICKET TOTAL:</td>
                     <td id="fieldTicketTotal" style="font-weight: bold;">$0.00</td>
                 </tr>
@@ -811,7 +811,7 @@
         // Configure html2pdf options
             const opt = {
                 margin: 0.5,
-                filename: 'field_ticket_form.pdf',
+                filename: filename,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { 
                     scale: 2, 
