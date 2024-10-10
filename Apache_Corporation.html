@@ -801,17 +801,29 @@
         event.preventDefault(); // Prevent scrolling on touch devices
     }
 
-    // Add mouse and touch event listeners for drawing
+    // Add mouse event listeners for drawing on desktops
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', stopDrawing);
     canvas.addEventListener('mouseout', stopDrawing);
 
-    // Touch events for mobile devices
-    canvas.addEventListener('touchstart', (e) => startDrawing(e.touches[0]));
-    canvas.addEventListener('touchmove', (e) => draw(e.touches[0]));
-    canvas.addEventListener('touchend', stopDrawing);
-    canvas.addEventListener('touchcancel', stopDrawing);
+    // Add touch event listeners for drawing on touch devices
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        startDrawing(e.touches[0]);
+    });
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        draw(e.touches[0]);
+    });
+    canvas.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        stopDrawing(e);
+    });
+    canvas.addEventListener('touchcancel', (e) => {
+        e.preventDefault();
+        stopDrawing(e);
+    });
 
     // Function to clear only the signature
     window.clearSignature = function () {
