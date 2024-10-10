@@ -837,114 +837,120 @@
 
     
   <!-- JavaScript for PDF generation -->
-    <script>
-        // Function to update total values
-        function updateTotal() {
-            const unitInputs = document.querySelectorAll('.units'); // Get all unit inputs
-            let grandTotal = 0; // To store the sum of all totals
+<script>
+    // Function to update total values
+    function updateTotal() {
+        const unitInputs = document.querySelectorAll('.units'); // Get all unit inputs
+        let grandTotal = 0; // To store the sum of all totals
 
-            unitInputs.forEach(input => {
-                const pricePerUnit = parseFloat(input.getAttribute('data-price')); // Get the price per unit
-                const units = parseFloat(input.value) || 0; // Get the number of units
-                const total = pricePerUnit * units; // Calculate the total
-                grandTotal += total; // Add to grand total
-                input.closest('tr').querySelector('.total').textContent = `$${total.toFixed(2)}`; // Update the row total
-            });
+        unitInputs.forEach(input => {
+            const pricePerUnit = parseFloat(input.getAttribute('data-price')); // Get the price per unit
+            const units = parseFloat(input.value) || 0; // Get the number of units
+            const total = pricePerUnit * units; // Calculate the total
+            grandTotal += total; // Add to grand total
+            input.closest('tr').querySelector('.total').textContent = `$${total.toFixed(2)}`; // Update the row total
+        });
 
-            // Update the grand total
-            document.getElementById('fieldTicketTotal').textContent = `$${grandTotal.toFixed(2)}`;
-        }
-        
-         // Function to auto-resize textarea based on content
+        // Update the grand total
+        document.getElementById('fieldTicketTotal').textContent = `$${grandTotal.toFixed(2)}`;
+    }
+
+    // Function to auto-resize textarea based on content
+    document.querySelectorAll('textarea').forEach(textarea => {
+        textarea.style.overflowY = 'hidden'; // Hide vertical scrollbar
+        textarea.style.height = 'auto'; // Reset to auto
+        textarea.style.height = textarea.scrollHeight + 'px'; // Set height based on scroll height
+
+        textarea.addEventListener('input', function () {
+            this.style.height = 'auto'; // Reset the height to auto to allow for shrink
+            this.style.height = this.scrollHeight + 'px'; // Adjust height based on content
+        });
+    });
+
+    // PDF generation
+    document.getElementById('generatePDF').addEventListener('click', () => {
+        // Retrieve the user inputs for "Customer", "Ticket #", and "Rig #"
+        const customer = document.getElementById('customer').value.trim() || 'Customer';
+        const ticketNumber = document.getElementById('ticket').value.trim() || 'Ticket';
+        const rigNumber = document.getElementById('rig').value.trim() || 'Rig';
+
+        // Construct the filename using customer, ticket number, and rig number
+        const filename = `${customer}_${ticketNumber}_${rigNumber}.pdf`.replace(/\s+/g, '_');
+
+        // Ensure all textareas expand to show full content
         document.querySelectorAll('textarea').forEach(textarea => {
-            textarea.style.overflowY = 'hidden'; // Hide vertical scrollbar
-            textarea.style.height = 'auto'; // Reset to auto
-            textarea.style.height = textarea.scrollHeight + 'px'; // Set height based on scroll height
-
-            textarea.addEventListener('input', function() {
-                this.style.height = 'auto'; // Reset the height to auto to allow for shrink
-                this.style.height = this.scrollHeight + 'px'; // Adjust height based on content
-            });
+            const content = textarea.value;
+            const textDiv = document.createElement('div');
+            textDiv.style.whiteSpace = 'pre-wrap';
+            textDiv.style.border = '1px solid #ced4da';
+            textDiv.style.padding = '5px';
+            textDiv.textContent = content;
+            textarea.replaceWith(textDiv);
         });
 
+        const element = document.getElementById('fieldTicketForm');
 
-       // PDF generation
-        document.getElementById('generatePDF').addEventListener('click', () => {
-            // Retrieve the user inputs for "Customer", "Ticket #", and "Rig #"
-            const customer = document.getElementById('customer').value.trim() || 'Customer';
-            const ticketNumber = document.getElementById('ticket').value.trim() || 'Ticket';
-            const rigNumber = document.getElementById('rig').value.trim() || 'Rig';
+        // Use html2canvas and jsPDF for custom PDF creation
+        html2canvas(element, {
+            scale: 2,
+            useCORS: true,
+            scrollY: 0,
+        }).then(canvas => {
+            const imgData = canvas.toDataURL('image/jpeg', 0.98);
+            const pdf = new jsPDF('portrait', 'pt', 'letter');
+            const imgWidth = 612; // Letter size width in points
+            const pageHeight = 792; // Letter size height in points
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 0;
 
-            // Construct the filename using customer, ticket number, and rig number
-            const filename = `${customer}_${ticketNumber}_${rigNumber}.pdf`.replace(/\s+/g, '_');
+            pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
 
-            // Ensure all textareas expand to show full content
-            document.querySelectorAll('textarea').forEach(textarea => {
-                const content = textarea.value;
-                const textDiv = document.createElement('div');
-                textDiv.style.whiteSpace = 'pre-wrap';
-                textDiv.style.border = '1px solid #ced4da';
-                textDiv.style.padding = '5px';
-                textDiv.textContent = content;
-                textarea.replaceWith(textDiv);
-            });
+            // Add additional pages if the content exceeds one page
+            while (heightLeft > 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
 
-            const element = document.getElementById('fieldTicketForm');
+            // Handle PDF download and open in new tab for iOS
+            const blob = pdf.output('blob');
+            const reader = new FileReader();
+            reader.onloadend = function () {
+                const pdfDataUrl = reader.result;
 
-            // Configure html2pdf options
-            const opt = {
-                margin: 0.5,
-                filename: filename,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 2,
-                    scrollY: 0,
-                    useCORS: true,
-                    logging: true
-                },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-
-            // Generate the PDF with html2pdf and handle different behavior for iOS and non-iOS
-            html2pdf().from(element).set(opt).toPdf().get('pdf').then((pdf) => {
-                const blob = pdf.output('blob');
-
-                // Use FileReader for all devices to generate a Data URL
-                const reader = new FileReader();
-                reader.onloadend = function() {
-                    const pdfDataUrl = reader.result;
-
-                    // For iOS devices, open the PDF in a new tab/window
-                    if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-                        const newWindow = window.open();
-                        if (newWindow) {
-                            newWindow.document.write('<iframe src="' + pdfDataUrl + '" frameborder="0" style="width:100%; height:100%;"></iframe>');
-                        } else {
-                            alert('Please allow popups for this site to download the PDF.');
-                        }
+                // For iOS devices, open the PDF in a new tab/window
+                if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+                    const newWindow = window.open();
+                    if (newWindow) {
+                        newWindow.document.write('<iframe src="' + pdfDataUrl + '" frameborder="0" style="width:100%; height:100%;"></iframe>');
                     } else {
-                        // For non-iOS devices, download the PDF directly
-                        const link = document.createElement('a');
-                        link.href = pdfDataUrl;
-                        link.download = filename;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
+                        alert('Please allow popups for this site to download the PDF.');
                     }
-                };
-                reader.readAsDataURL(blob);
-            }).then(() => {
-                // Convert divs back to textareas after the PDF is generated
-                document.querySelectorAll('div[style*="white-space"]').forEach(div => {
-                    const textarea = document.createElement('textarea');
-                    textarea.className = 'form-control';
-                    textarea.value = div.textContent;
-                    div.replaceWith(textarea);
-                });
+                } else {
+                    // For non-iOS devices, download the PDF directly
+                    const link = document.createElement('a');
+                    link.href = pdfDataUrl;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            };
+            reader.readAsDataURL(blob);
+        }).then(() => {
+            // Convert divs back to textareas after the PDF is generated
+            document.querySelectorAll('div[style*="white-space"]').forEach(div => {
+                const textarea = document.createElement('textarea');
+                textarea.className = 'form-control';
+                textarea.value = div.textContent;
+                div.replaceWith(textarea);
             });
         });
-    </script>
-
+    });
+</script>
     <script>
         document.querySelectorAll('textarea').forEach(textarea => {
             textarea.addEventListener('input', function() {
