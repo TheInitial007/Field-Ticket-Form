@@ -834,9 +834,11 @@
     });
 </script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     
-  <!-- JavaScript for PDF generation -->
+ <!-- JavaScript for PDF generation -->
 <script>
     // Function to update total values
     function updateTotal() {
@@ -869,7 +871,9 @@
 
     // PDF generation
     document.getElementById('generatePDF').addEventListener('click', () => {
-        // Retrieve the user inputs for "Customer", "Ticket #", and "Rig #"
+        const { jsPDF } = window.jspdf;
+
+        // Retrieve user inputs for "Customer", "Ticket #", and "Rig #"
         const customer = document.getElementById('customer').value.trim() || 'Customer';
         const ticketNumber = document.getElementById('ticket').value.trim() || 'Ticket';
         const rigNumber = document.getElementById('rig').value.trim() || 'Rig';
@@ -877,80 +881,44 @@
         // Construct the filename using customer, ticket number, and rig number
         const filename = `${customer}_${ticketNumber}_${rigNumber}.pdf`.replace(/\s+/g, '_');
 
-        // Ensure all textareas expand to show full content
-        document.querySelectorAll('textarea').forEach(textarea => {
-            const content = textarea.value;
-            const textDiv = document.createElement('div');
-            textDiv.style.whiteSpace = 'pre-wrap';
-            textDiv.style.border = '1px solid #ced4da';
-            textDiv.style.padding = '5px';
-            textDiv.textContent = content;
-            textarea.replaceWith(textDiv);
-        });
-
+        // Get the form element to convert to PDF
         const element = document.getElementById('fieldTicketForm');
 
-        // Use html2canvas and jsPDF for custom PDF creation
-        html2canvas(element, {
-            scale: 2,
-            useCORS: true,
-            scrollY: 0,
-        }).then(canvas => {
-            const imgData = canvas.toDataURL('image/jpeg', 0.98);
-            const pdf = new jsPDF('portrait', 'pt', 'letter');
-            const imgWidth = 612; // Letter size width in points
-            const pageHeight = 792; // Letter size height in points
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            let heightLeft = imgHeight;
-            let position = 0;
+        // Use html2canvas to capture the form
+        html2canvas(element, { scale: 2, useCORS: true }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
 
-            pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-
-            // Add additional pages if the content exceeds one page
-            while (heightLeft > 0) {
-                position = heightLeft - imgHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-            }
-
-            // Handle PDF download and open in new tab for iOS
-            const blob = pdf.output('blob');
-            const reader = new FileReader();
-            reader.onloadend = function () {
-                const pdfDataUrl = reader.result;
-
-                // For iOS devices, open the PDF in a new tab/window
-                if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-                    const newWindow = window.open();
-                    if (newWindow) {
-                        newWindow.document.write('<iframe src="' + pdfDataUrl + '" frameborder="0" style="width:100%; height:100%;"></iframe>');
-                    } else {
-                        alert('Please allow popups for this site to download the PDF.');
-                    }
-                } else {
-                    // For non-iOS devices, download the PDF directly
-                    const link = document.createElement('a');
-                    link.href = pdfDataUrl;
-                    link.download = filename;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                }
-            };
-            reader.readAsDataURL(blob);
-        }).then(() => {
-            // Convert divs back to textareas after the PDF is generated
-            document.querySelectorAll('div[style*="white-space"]').forEach(div => {
-                const textarea = document.createElement('textarea');
-                textarea.className = 'form-control';
-                textarea.value = div.textContent;
-                div.replaceWith(textarea);
+            // Create a new jsPDF instance with letter format
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'px',
+                format: 'a4'
             });
+
+            // Calculate image dimensions for the PDF
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+            // Add the image to the PDF
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+            // Check if the device is iOS (iPhone or iPad)
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+            // For iOS devices, open the PDF in a new tab
+            if (isIOS) {
+                pdf.output('dataurlnewwindow');
+            } else {
+                // For non-iOS devices, download the PDF
+                pdf.save(filename);
+            }
+        }).catch((error) => {
+            console.error('Error generating PDF:', error);
+            alert('An error occurred while generating the PDF. Please try again.');
         });
     });
 </script>
+
     <script>
         document.querySelectorAll('textarea').forEach(textarea => {
             textarea.addEventListener('input', function() {
