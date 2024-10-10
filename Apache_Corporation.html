@@ -869,78 +869,86 @@
 
 
         // PDF generation
-        document.getElementById('generatePDF').addEventListener('click', () => {
-            // Retrieve the user inputs for "Customer", "Ticket #", and "Rig #"
-            const customer = document.getElementById('customer').value.trim() || 'Customer';
-            const ticketNumber = document.getElementById('ticket').value.trim() || 'Ticket';
-            const rigNumber = document.getElementById('rig').value.trim() || 'Rig';
+        // PDF generation
+document.getElementById('generatePDF').addEventListener('click', () => {
+    // Retrieve the user inputs for "Customer", "Ticket #", and "Rig #"
+    const customer = document.getElementById('customer').value.trim() || 'Customer';
+    const ticketNumber = document.getElementById('ticket').value.trim() || 'Ticket';
+    const rigNumber = document.getElementById('rig').value.trim() || 'Rig';
 
-            // Construct the filename using customer, ticket number, and rig number
-            const filename = `${customer}_${ticketNumber}_${rigNumber}_.pdf`.replace(/\s+/g, '_');
+    // Construct the filename using customer, ticket number, and rig number
+    const filename = `${customer}_${ticketNumber}_${rigNumber}_.pdf`.replace(/\s+/g, '_');
 
-            // Ensure all textareas expand to show full content
-            document.querySelectorAll('textarea').forEach(textarea => {
-                const content = textarea.value;
-                const textDiv = document.createElement('div');
-                textDiv.style.whiteSpace = 'pre-wrap';
-                textDiv.style.border = '1px solid #ced4da';
-                textDiv.style.padding = '5px';
-                textDiv.textContent = content;
-                textarea.replaceWith(textDiv);
-            });
+    // Ensure all textareas expand to show full content
+    document.querySelectorAll('textarea').forEach(textarea => {
+        const content = textarea.value;
+        const textDiv = document.createElement('div');
+        textDiv.style.whiteSpace = 'pre-wrap';
+        textDiv.style.border = '1px solid #ced4da';
+        textDiv.style.padding = '5px';
+        textDiv.textContent = content;
+        textarea.replaceWith(textDiv);
+    });
 
-            const element = document.getElementById('fieldTicketForm');
+    const element = document.getElementById('fieldTicketForm');
 
-            // Configure html2pdf options
-            const opt = {
-                margin: 0.5,
-                filename: filename,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 2,
-                    scrollY: 0,
-                    useCORS: true,
-                    logging: true
-                },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    // Configure html2pdf options
+    const opt = {
+        margin: 0.5,
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 2,
+            scrollY: 0,
+            useCORS: true,
+            logging: true
+        },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+
+    // Function to check if the user is on an iOS device (iPhone or iPad)
+    function isIOS() {
+        return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    }
+
+    // Generate the PDF with html2pdf and handle different behavior for iOS and non-iOS
+    html2pdf().from(element).set(opt).toPdf().get('pdf').then((pdf) => {
+        const blob = pdf.output('blob');
+
+        if (isIOS()) {
+            // For iOS devices, use FileReader to convert Blob to a data URL and open it
+            const reader = new FileReader();
+            reader.onloadend = function() {
+                const pdfDataUrl = reader.result;
+                const link = document.createElement('a');
+                link.href = pdfDataUrl;
+                link.target = '_blank'; // Open in a new tab
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             };
-
-            // Function to check if the user is on an iOS device (iPhone or iPad)
-            function isIOS() {
-                return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-            }
-
-            // Generate the PDF with html2pdf and handle different behavior for iOS and non-iOS
-            html2pdf().from(element).set(opt).toPdf().get('pdf').then((pdf) => {
-                const blob = pdf.output('blob');
-                const url = URL.createObjectURL(blob);
-
-                if (isIOS()) {
-                    // Create a link and simulate a click for iOS devices to open the PDF
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.target = '_blank'; // Ensure it opens in a new tab
-                    link.download = filename;
-                    document.body.appendChild(link); // Append to the body
-                    link.click(); // Trigger click
-                    document.body.removeChild(link); // Clean up
-                } else {
-                    // For other devices, trigger a download
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = filename;
-                    link.click();
-                }
-            }).then(() => {
-                // Convert divs back to textareas after the PDF is generated
-                document.querySelectorAll('div[style*="white-space"]').forEach(div => {
-                    const textarea = document.createElement('textarea');
-                    textarea.className = 'form-control';
-                    textarea.value = div.textContent;
-                    div.replaceWith(textarea);
-                });
-            });
+            reader.readAsDataURL(blob);
+        } else {
+            // For other devices, create a Blob URL and trigger a download
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(url); // Clean up the object URL after download
+        }
+    }).then(() => {
+        // Convert divs back to textareas after the PDF is generated
+        document.querySelectorAll('div[style*="white-space"]').forEach(div => {
+            const textarea = document.createElement('textarea');
+            textarea.className = 'form-control';
+            textarea.value = div.textContent;
+            div.replaceWith(textarea);
         });
+    });
+});
+
     </script>
 
     <script>
