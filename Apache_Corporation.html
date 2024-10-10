@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Field Ticket Form - Apache Corporation</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- library to convert to PDf -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
     <style>
         body {
@@ -15,944 +13,253 @@
             padding: 20px;
         }
 
-        /* Prevent rows from breaking across pages */
-        table, tr, td, th {
-            page-break-inside: avoid; /* Ensure rows, cells, and headers don't break across pages */
-            page-break-after: auto;    /* Allow page breaks after rows if necessary */
-        }
-
-        /* Avoid cutting sections or containers by page breaks */
-        .container, .header-container {
+        .container, .header-container, table, tr, td, th {
             page-break-inside: avoid;
         }
 
-
-        /* Force a page break after this class */
         .page-break {
             page-break-after: always;
         }
 
-        /* Header Styling */
         .header-container {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 10px;
-            background-color: #fff;
+            background: #fff;
             padding: 20px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
-        }
-
-        .header-left, .header-middle, .header-right {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            height: 100%
-        }
-
-        .header-middle input, .header-right input {
-            background-color: #ffffff;
-            border: 1px solid #ced4da; 
-            padding: 5px;
-            text-align: center;
         }
 
         .header-left img {
             max-width: 275px;
-            align-self: left;
         }
 
-        .header-left p {
-            margin-bottom: 0.2rem;
-            line-height: 1.2;
-        }
-        .header-left h4 {
-            margin-bottom: 0.2rem; /* Reduce space below "TAZ Well Service" */
-        }
-
-        .header-left p:first-of-type {
-            margin-top: 0.2rem; /* Reduce space above "PO Box" */
-        }
-        
-        .header-middle label, .header-right label {
-            font-weight: bold;
-        }
-
-        .header-middle input, .header-right input {
+        .header-middle input, .header-right input, select {
             margin-bottom: 10px;
+            background: #fff;
+            border: 1px solid #ced4da;
+            padding: 5px;
+            text-align: center;
         }
 
-        .header-middle, .header-right input {
-            margin-bottom: 0
-        }
-        /* Style for the dropdown */
         select {
-            background-color: rgb(207, 207, 202); /* Gray background */
-            border: 1px solid #ced4da; /* Match input fields */
-            padding: 5px; /* Adjust padding */
-            color: #495057; /* Text color */
-            font-family: inherit; /* Same font as input fields */
-            appearance: none; /* Remove default appearance */
-            -webkit-appearance: none; /* For Safari */
-            -moz-appearance: none; /* For Firefox */
-            border-radius: 0; /* Match input fields */
-            text-align-last: center; /* Center text */
-            background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="gray"%3E%3Cpath d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /%3E%3C/svg%3E');
-            background-repeat: no-repeat;
-            background-position: right 10px center; /* Position custom arrow */
+            appearance: none;
+            background: #cfcfc2 url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="gray"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>') no-repeat right 10px center;
             background-size: 16px;
         }
 
         table {
-            background-color: #fff; /* Matching background color */
-            padding: 20px; /* Optional: Add padding to create space around the table */
-            border-radius: 8px; /* Optional: Add border radius to match the style */
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Optional: Add shadow to match header styling */
-        }
-
-        table {
-            width: fixed !important; /* Make table take up full width of the header */
-            border-collapse: collapse; /* Remove extra spacing between table cells */
+            background: #fff;
+            width: 100%;
+            padding: 20px;
+            border-collapse: collapse;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
         th, td {
-            padding: 10px; /* Add some padding for a clean layout */
-            text-align: left; /* Align text to the left */
-            border: 1px solid #ddd; /* Add border for a neat table */
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
         }
 
         th {
-            background-color: #f0f0f0; /* Light background for header */
+            background: #f0f0f0;
             font-weight: bold;
         }
 
         td:first-child {
-            width: 50%; /* Set fixed width for the first column (Services) */
+            width: 50%;
         }
 
-        td, th {
-            width: 16.66%; /* Equal width for the rest of the columns (Units, Unit Price, Total) */
-        }
-
-        input {
-            width: 100%; /* Make input fields take up full width of their cells */
-            box-sizing: border-box; /* Ensure padding and borders are included in the width */
-        }
-
-        /* Form Styling */
-        form {
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Adjust column widths */
-        #payrollTable th:nth-child(2), 
-        #payrollTable td:nth-child(2) {
-            width: 45%; /* Increase width of the "Name" column */
-        }
-    
-        #payrollTable th:nth-child(3),
-        #payrollTable td:nth-child(3),
-        #payrollTable th:nth-child(4),
-        #payrollTable td:nth-child(4) {
-            width: 10%; /* Decrease width of the "Time" columns */
-        }
-
-        /* Make the input field text wrap */
-        input.form-control {
-            white-space: normal; /* Enable wrapping */
-            word-wrap: break-word; /* Wrap long words if needed */
-            overflow: hidden; /* Prevent overflowing content */
-        }
-
-        textarea.form-control {
+        input.form-control, textarea.form-control {
+            width: 100%;
             box-sizing: border-box;
-            width: 100%; /* Full width */
-            height: auto; /* Auto height based on content */
-            min-height: 50px; /* Ensure minimum height */
-            max-height: none; /* Disable max height restrictions */
-            white-space: pre-wrap; /* Preserve white spaces */
-            overflow: visible !important; /* Force overflow to be visible */
-            word-wrap: break-word;
-            resize: none; /* Disable manual resizing */
+            overflow: hidden;
+            resize: none;
         }
+
         #signature-pad {
-        touch-action: none; /* Disable touch actions like scrolling on this element */
+            touch-action: none;
+            border: 1px solid #ced4da;
         }
     </style>
 </head>
 <body>
     <form id="fieldTicketForm">
-    <div class="container mt-5">
-
-        <!-- Header Section -->
-         <!-- Logo -->
-        <div class="header-container">
-            <!-- Left Side (Company Info & Logo) -->
-            <div class="header-left">
-                <img src="TAZ-Logo.png" alt="TAZ Well Service, Inc">
-                <h4>TAZ Well Service, Inc</h4>
-                <p>PO Box 41</p>
-                <p>Colorado City, TX 79512</p>
-                <p><strong>BILL TO:</strong></p>
-                <textarea class="form-control" placeholder="Enter billing information" rows="4"></textarea>
-
-            </div>
-
-            <!-- Middle Section (Form Input Fields) -->
-            <div class="header-middle">
-                <label for="date">Date:</label>
-                <input type="date" id="date" value="2024-09-20">
-
-                <label for="customer">CUSTOMER NAME:</label>
-                <input type="text" id="customer" class="form-control" value="Apache Corporation" readonly>
-
-                
-                <label for="wellName">WELL NAME:</label>
-                <input type="text" id="wellName" placeholder="Enter Well Name">
-                                    
-                <label for="county">COUNTY:</label>
-                <input type="text" id="county" placeholder="Enter County">
-                
-                <label for="state">STATE:</label>
-                <select id:="state" class="form-control">
-                        <option value=""disabled selected>Select State</option>
+        <div class="container mt-5">
+            <div class="header-container">
+                <div class="header-left">
+                    <img src="TAZ-Logo.png" alt="TAZ Well Service, Inc">
+                    <h4>TAZ Well Service, Inc</h4>
+                    <p>PO Box 41</p>
+                    <p>Colorado City, TX 79512</p>
+                    <p><strong>BILL TO:</strong></p>
+                    <textarea class="form-control" placeholder="Enter billing information" rows="4"></textarea>
+                </div>
+                <div class="header-middle">
+                    <label for="date">Date:</label>
+                    <input type="date" id="date" value="2024-09-20">
+                    <label for="customer">CUSTOMER NAME:</label>
+                    <input type="text" id="customer" class="form-control" value="Apache Corporation" readonly>
+                    <label for="wellName">WELL NAME:</label>
+                    <input type="text" id="wellName" placeholder="Enter Well Name">
+                    <label for="county">COUNTY:</label>
+                    <input type="text" id="county" placeholder="Enter County">
+                    <label for="state">STATE:</label>
+                    <select id="state" class="form-control">
+                        <option value="" disabled selected>Select State</option>
                         <option value="NM">New Mexico</option>
                         <option value="OK">Oklahoma</option>
                         <option value="TX">Texas</option>
-
-                </select>
-                
-            </div>
-
-            <!-- Right Side (More Input Fields) -->
-            <div class="header-right">
-                <label for="ticket">Ticket #:</label>
-                <input type="text" id="ticket" placeholder="Enter Ticket #">
-                <label for="rig">RIG #:</label>
+                    </select>
+                </div>
+                <div class="header-right">
+                    <label for="ticket">Ticket #:</label>
+                    <input type="text" id="ticket" placeholder="Enter Ticket #">
+                    <label for="rig">RIG #:</label>
                     <select id="rig" class="form-control">
-                    <option value="" disabled selected>Select Rig</option>
-                    <option value="Rig3">Rig 3</option>
-                    <option value="Rig4">Rig 4</option>
-                    <option value="Rig5">Rig 5</option>
-                    <option value="Rig6">Rig 6</option>
-                    <option value="Rig7">Rig 7</option>
-                    <option value="Rig8">Rig 8</option>
-                    <option value="Rig9">Rig 9</option>
-                    <option value="Rig10">Rig 10</option>
-                    <option value="Rig11">Rig 11</option>
-                    <option value="Rig12">Rig 12</option>
-                    <option value="Rig13">Rig 13</option>
-                    <option value="Rig14">Rig 14</option>
-                    <option value="Rig15">Rig 15</option>
-                    <option value="Rig16">Rig 16</option>
-                    <option value="Rig17">Rig 17</option>
-                    <option value="Rig18">Rig 18</option>
-                    <option value="Rig19">Rig 19</option>
-                    <option value="Rig20">Rig 20</option>
-                    <option value="Rig21">Rig 21</option>
-                </select>
-                <label for="afe">AFE #:</label>
-                <input type="text" id="afe" placeholder="Enter AFE #">
-                
-                <label for="po">PO #:</label>
-                <input type="text" id="po" placeholder="Enter PO #">
-                
-                <label for="coMan">CO. MAN:</label>
-                <input type="text" id="coMan" placeholder="Enter Co. Man">
+                        <option value="" disabled selected>Select Rig</option>
+                        ${[...Array(19)].map((_, i) => `<option value="Rig${i + 3}">Rig ${i + 3}</option>`).join('')}
+                    </select>
+                    <label for="afe">AFE #:</label>
+                    <input type="text" id="afe" placeholder="Enter AFE #">
+                    <label for="po">PO #:</label>
+                    <input type="text" id="po" placeholder="Enter PO #">
+                    <label for="coMan">CO. MAN:</label>
+                    <input type="text" id="coMan" placeholder="Enter Co. Man">
+                </div>
             </div>
         </div>
-    
-    </div>
 
-    <div class="table-container container mt-5">
-        <table id="billingTable" border="1">
-            <thead>
-                <!-- Billing Header -->
-                <tr>
-                    <th colspan="4" style="text-align: center; background-color: #f0f0f0; padding: 10px; font-weight: bold;">
-                        BILLING
-                    </th>
-                </tr>
-                <!-- Services Header Row -->
-                <tr>
-                    <th>SERVICES</th>
-                    <th>UNITS</th>
-                    <th>UNIT PRICE</th>
-                    <th>TOTAL</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Rig</td>
-                    <td><input type="number" class="units" data-price="340.00" onchange="updateTotal()"></td>
-                    <td>$340.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>Extra Labor</td>
-                    <td><input type="number" class="units" data-price="145.00" onchange="updateTotal()"></td>
-                    <td>$145.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>Rig Supervisor</td>
-                    <td><input type="number" class="units" data-price="500.00" onchange="updateTotal()"></td>
-                    <td>$500.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>Travel Time</td>
-                    <td><input type="number" class="units" data-price="300.00" onchange="updateTotal()"></td>
-                    <td>$300.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>Out of Town</td>
-                    <td><input type="number" class="units" data-price="180.00" onchange="updateTotal()"></td>
-                    <td>$180.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>Crew Truck</td>
-                    <td><input type="number" class="units" data-price="150.00" onchange="updateTotal()"></td>
-                    <td>$150.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>Rig Standby if Requested (min. 8hrs)</td>
-                    <td><input type="number" class="units" data-price="350.00" onchange="updateTotal()"></td>
-                    <td>$350.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>Safety</td>
-                    <td><input type="number" class="units" data-price="50.00" onchange="updateTotal()"></td>
-                    <td>$50.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-    
-                <!-- New Section: SERVICE AND RENTAL -->
-                <tr>
-                    <th colspan="4" style="text-align: center; background-color: #f0f0f0; padding: 10px; font-weight: bold;">
-                        SERVICE AND RENTAL
-                    </th>
-                </tr>
-                <tr>
-                    <td>Transportation</td>
-                    <td><input type="number" class="units" data-price="600.00" onchange="updateTotal()"></td>
-                    <td>$600.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>Laydown Machine</td>
-                    <td><input type="number" class="units" data-price="1750.00" onchange="updateTotal()"></td>
-                    <td>$1,750.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>Base Beam</td>
-                    <td><input type="number" class="units" data-price="200.00" onchange="updateTotal()"></td>
-                    <td>$200.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>Rig Mat</td>
-                    <td><input type="number" class="units" data-price="50.00" onchange="updateTotal()"></td>
-                    <td>$50.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>BOP</td>
-                    <td><input type="number" class="units" data-price="475.00" onchange="updateTotal()"></td>
-                    <td>$475.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>Pipe Racks</td>
-                    <td><input type="number" class="units" data-price="100.00" onchange="updateTotal()"></td>
-                    <td>$100.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-    
-                <!-- New Section: EXPENDABLE / SALE ITEMS -->
-                <tr>
-                    <th colspan="4" style="text-align: center; background-color: #f0f0f0; padding: 10px; font-weight: bold;">
-                        EXPENDABLE / SALE ITEMS
-                    </th>
-                </tr>
-                <tr>
-                    <td>Rig Fuel - 90GL X $6.00gls</td>
-                    <td><input type="number" class="units" data-price="6.00" onchange="updateTotal()"></td>
-                    <td>$6.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>Tubing Tongs</td>
-                    <td><input type="number" class="units" data-price="125.00" onchange="updateTotal()"></td>
-                    <td>$125.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>Rod Tongs</td>
-                    <td><input type="number" class="units" data-price="100.00" onchange="updateTotal()"></td>
-                    <td>$100.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>Slip Dies</td>
-                    <td><input type="number" class="units" data-price="300.00" onchange="updateTotal()"></td>
-                    <td>$300.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>Tong Dies</td>
-                    <td><input type="number" class="units" data-price="105.00" onchange="updateTotal()"></td>
-                    <td>$105.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>Wiper Rubber</td>
-                    <td><input type="number" class="units" data-price="25.00" onchange="updateTotal()"></td>
-                    <td>$25.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>Rod Stripper</td>
-                    <td><input type="number" class="units" data-price="50.00" onchange="updateTotal()"></td>
-                    <td>$50.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>Swab Cups</td>
-                    <td><input type="number" class="units" data-price="25.00" onchange="updateTotal()"></td>
-                    <td>$25.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>Oil Saver</td>
-                    <td><input type="number" class="units" data-price="50.00" onchange="updateTotal()"></td>
-                    <td>$50.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>Fishing Tool</td>
-                    <td><input type="number" class="units" data-price="200.00" onchange="updateTotal()"></td>
-                    <td>$200.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td colspan="3" style="text-align: right; font-weight: bold;">FIELD TICKET TOTAL:</td>
-                    <td id="fieldTicketTotal" style="font-weight: bold;">$0.00</td>
-                </tr>
-    
-                <!-- Description of Work / Company Man Approval Section -->
-                <tr>
-                    <td colspan="2" style="text-align: center; font-weight: bold; background-color: #f0f0f0;">DESCRIPTION OF WORK</td>
-                    <td colspan="2" style="text-align: center; font-weight: bold; background-color: #f0f0f0;">COMPANY MAN APPROVAL</td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <textarea class="form-control" placeholder="Enter description of work" style="width: 100%; height: 100px;"></textarea>
-                    </td>
-                    <td colspan="2" style="text-align: center;">
-                        <h5>Company Man Approval</h5>
-                        <canvas id="signature-pad" style="border: 1px solid #ccc; width: 100%; height: 150px;"></canvas>
-                        <button type="button" class="btn btn-danger mt-2" onclick="clearSignature()">Clear</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>   
-    
-    <!-- Add this script for the calculations -->
+        <div class="container mt-5">
+            <table id="billingTable">
+                <thead>
+                    <tr>
+                        <th colspan="4">BILLING</th>
+                    </tr>
+                    <tr>
+                        <th>SERVICES</th>
+                        <th>UNITS</th>
+                        <th>UNIT PRICE</th>
+                        <th>TOTAL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${[
+                        { service: "Rig", price: 340 },
+                        { service: "Extra Labor", price: 145 },
+                        { service: "Rig Supervisor", price: 500 },
+                        { service: "Travel Time", price: 300 },
+                        { service: "Out of Town", price: 180 },
+                        { service: "Crew Truck", price: 150 },
+                        { service: "Rig Standby", price: 350 },
+                        { service: "Safety", price: 50 },
+                    ].map(
+                        (item) => `
+                        <tr>
+                            <td>${item.service}</td>
+                            <td><input type="number" class="units" data-price="${item.price}" onchange="updateTotal()"></td>
+                            <td>$${item.price.toFixed(2)}</td>
+                            <td class="total">$0.00</td>
+                        </tr>`
+                    ).join('')}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="container mt-5">
+            <table id="payrollTable">
+                <thead>
+                    <tr>
+                        <th colspan="6">PAYROLL</th>
+                    </tr>
+                    <tr>
+                        <th>JOB TITLE</th>
+                        <th>NAME</th>
+                        <th>TIME</th>
+                        <th>TIME</th>
+                        <th>TOTAL HOURS</th>
+                        <th>SHIFT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${['Pusher', 'Operator', 'Derrickhand', 'Floorhand', 'Extra Worker'].map((role) =>
+                        `<tr>
+                            <td>${role}</td>
+                            <td><textarea class="form-control" placeholder="Enter ${role}'s Name"></textarea></td>
+                            <td><input type="time" class="start-time"></td>
+                            <td><input type="time" class="end-time"></td>
+                            <td class="total-hours">0</td>
+                            <td><select class="shift"><option disabled selected>Select shift</option><option>Day</option><option>Night</option></select></td>
+                        </tr>`).join('')}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="container mt-3">
+            <button id="generatePDF" class="btn btn-success">Download PDF</button>
+            <button type="submit" class="btn btn-primary">Submit Form</button>
+        </div>
+    </form>
+
     <script>
         function updateTotal() {
-            const unitInputs = document.querySelectorAll('.units'); // Get all unit inputs
-            let grandTotal = 0; // To store the sum of all totals
-    
+            const unitInputs = document.querySelectorAll('.units');
+            let grandTotal = 0;
             unitInputs.forEach(input => {
-                const pricePerUnit = parseFloat(input.getAttribute('data-price')); // Get the price per unit from data-price
-                const units = parseFloat(input.value) || 0; // Get the units, default to 0 if not defined
-                const total = pricePerUnit * units; // Calculate the total for this row
-                grandTotal += total; // Add the row total to the grand total
-    
-                // Update the total for this row in the table
+                const price = parseFloat(input.getAttribute('data-price')) || 0;
+                const units = parseFloat(input.value) || 0;
+                const total = price * units;
                 input.closest('tr').querySelector('.total').textContent = `$${total.toFixed(2)}`;
+                grandTotal += total;
             });
-    
-            // Update the grand total in the "FIELD TICKET TOTAL" row
             document.getElementById('fieldTicketTotal').textContent = `$${grandTotal.toFixed(2)}`;
         }
-    
-        // Call updateTotal initially to ensure all values are calculated from the start
-        updateTotal();
-    </script>
 
-    <div class="table-container container mt-5">
-        <table id="payrollTable" border="1">
-            <thead>
-                <!-- Payroll Header -->
-                <tr>
-                    <th colspan="6" style="text-align: center; background-color: #f0f0f0; padding: 10px; font-weight: bold;">
-                        PAYROLL
-                    </th>
-                </tr>
-                <!-- Payroll Columns -->
-                <tr>
-                    <th>JOB TITLE</th>
-                    <th>NAME</th>
-                    <th>TIME</th>
-                    <th>TIME</th>
-                    <th>TOTAL HOURS</th>
-                    <th>Shift (Day Or Night)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Pusher</td>
-                    <td><textarea class="form-control" name="pusherName" placeholder="Enter Pusher's Name"></textarea></td>
-                    <td><input type="time" class="start-time"></td>
-                    <td><input type="time" class="end-time"></td>
-                    <td class="total-hours">0</td>
-                    <td>
-                        <select class="shift">
-                            <option value="" disabled selected>Select shift</option>
-                            <option value="Day">Day</option>
-                            <option value="Night">Night</option>
-                        </select>
-                        <button type="button" onclick="resetShift(this)">Reset</button> <!-- Reset button -->
-                    </td>
-                </tr>
-                <tr>
-                    <td>Operator</td>
-                    <td><textarea class="form-control" name="operatorName" placeholder="Enter Operator's Name"></textarea></td>
-                    <td><input type="time" class="start-time"></td>
-                    <td><input type="time" class="end-time"></td>
-                    <td class="total-hours">0</td>
-                    <td>
-                        <select class="shift">
-                            <option value="" disabled selected>Select shift</option>
-                            <option value="Day">Day</option>
-                            <option value="Night">Night</option>
-                        </select>
-                        <button type="button" onclick="resetShift(this)">Reset</button> <!-- Reset button -->
-                    </td>
-                </tr>
-                <tr>
-                    <td>Derrickhand</td>
-                    <td><textarea class="form-control" name="derrickhandName" placeholder="Enter Derrickhand's Name"></textarea></td>
-                    <td><input type="time" class="start-time"></td>
-                    <td><input type="time" class="end-time"></td>
-                    <td class="total-hours">0</td>
-                    <td>
-                        <select class="shift">
-                            <option value="" disabled selected>Select shift</option>
-                            <option value="Day">Day</option>
-                            <option value="Night">Night</option>
-                        </select>
-                        <button type="button" onclick="resetShift(this)">Reset</button> <!-- Reset button -->
-                    </td>
-                </tr>
-                <tr>
-                    <td>Floorhand</td>
-                    <td><textarea class="form-control" name="floorhandName" placeholder="Enter Floorhand's Name"></textarea></td>
-                    <td><input type="time" class="start-time"></td>
-                    <td><input type="time" class="end-time"></td>
-                    <td class="total-hours">0</td>
-                    <td>
-                        <select class="shift">
-                            <option value="" disabled selected>Select shift</option>
-                            <option value="Day">Day</option>
-                            <option value="Night">Night</option>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Floorhand</td>
-                    <td><textarea class="form-control" name="floorhandName" placeholder="Enter Floorhand's Name"></textarea></td>
-                    <td><input type="time" class="start-time"></td>
-                    <td><input type="time" class="end-time"></td>
-                    <td class="total-hours">0</td>
-                    <td>
-                        <select class="shift">
-                            <option value="" disabled selected>Select shift</option>
-                            <option value="Day">Day</option>
-                            <option value="Night">Night</option>
-                        </select>
-                        <button type="button" onclick="resetShift(this)">Reset</button> <!-- Reset button -->
-                    </td>
-                </tr>
-                <tr>
-                <tr>
-                    <td>Extra Worker</td>
-                    <td><textarea class="form-control" name="extraName" placeholder="Enter Extra's Name"></textarea></td>
-                    <td><input type="time" class="start-time"></td>
-                    <td><input type="time" class="end-time"></td>
-                    <td class="total-hours">0</td>
-                    <td>
-                        <select class="shift">
-                            <option value="" disabled selected>Select shift</option>
-                            <option value="Day">Day</option>
-                            <option value="Night">Night</option>
-                        </select>
-                        <button type="button" onclick="resetShift(this)">Reset</button> <!-- Reset button -->
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="6" style="height: 10px;"></td> <!-- Adjust the height as needed -->
-                </tr>
-    
-                <tr>
-                    <td>Pusher (2nd Shift)</td>
-                    <td><textarea class="form-control" name="pusherName" placeholder="Enter Pusher's Name"></textarea></td>
-                    <td><input type="time" class="start-time"></td>
-                    <td><input type="time" class="end-time"></td>
-                    <td class="total-hours">0</td>
-                    <td>
-                        <select class="shift">
-                            <option value="" disabled selected>Select shift</option>
-                            <option value="Day">Day</option>
-                            <option value="Night">Night</option>
-                        </select>
-                        <button type="button" onclick="resetShift(this)">Reset</button> <!-- Reset button -->
-                    </td>
-                </tr>
-                <tr>
-                    <td>Operator (2nd Shift)</td>
-                    <td><textarea class="form-control" name="operatorName" placeholder="Enter Operator's Name"></textarea></td>
-                    <td><input type="time" class="start-time"></td>
-                    <td><input type="time" class="end-time"></td>
-                    <td class="total-hours">0</td>
-                    <td>
-                        <select class="shift">
-                            <option value="" disabled selected>Select shift</option>
-                            <option value="Day">Day</option>
-                            <option value="Night">Night</option>
-                        </select>
-                        <button type="button" onclick="resetShift(this)">Reset</button> <!-- Reset button -->
-                    </td>
-                </tr>
-                <tr>
-                    <td>Derrickhand (2nd Shift)</td>
-                    <td><textarea class="form-control" name="derrickhandName" placeholder="Enter Derrickhand's Name"></textarea></td>
-                    <td><input type="time" class="start-time"></td>
-                    <td><input type="time" class="end-time"></td>
-                    <td class="total-hours">0</td>
-                    <td>
-                        <select class="shift">
-                            <option value="" disabled selected>Select shift</option>
-                            <option value="Day">Day</option>
-                            <option value="Night">Night</option>
-                        </select>
-                        <button type="button" onclick="resetShift(this)">Reset</button> <!-- Reset button -->
-                    </td>
-                </tr>
-                <tr>
-                    <td>Floorhand (2nd Shift)</td>
-                    <td><textarea class="form-control" name="floorhandName" placeholder="Enter Floorhand's Name"></textarea></td>
-                    <td><input type="time" class="start-time"></td>
-                    <td><input type="time" class="end-time"></td>
-                    <td class="total-hours">0</td>
-                    <td>
-                        <select class="shift">
-                            <option value="" disabled selected>Select shift</option>
-                            <option value="Day">Day</option>
-                            <option value="Night">Night</option>
-                        </select>
-                        <button type="button" onclick="resetShift(this)">Reset</button> <!-- Reset button -->
-                    </td>
-                </tr>
-                <tr>
-                    <td>Floorhand (2nd Shift)</td>
-                    <td><textarea class="form-control" name="floorhandName" placeholder="Enter Floorhand's Name"></textarea></td>
-                    <td><input type="time" class="start-time"></td>
-                    <td><input type="time" class="end-time"></td>
-                    <td class="total-hours">0</td>
-                    <td>
-                        <select class="shift">
-                            <option value="" disabled selected>Select shift</option>
-                            <option value="Day">Day</option>
-                            <option value="Night">Night</option>
-                        </select>
-                        <button type="button" onclick="resetShift(this)">Reset</button> <!-- Reset button -->
-                    </td>
-                </tr>
-                <tr>
-                    <td>Extra Worker</td>
-                    <td><textarea class="form-control" name="extraName" placeholder="Enter Extra's Name"></textarea></td>
-                    <td><input type="time" class="start-time"></td>
-                    <td><input type="time" class="end-time"></td>
-                    <td class="total-hours">0</td>
-                    <td>
-                        <select class="shift">
-                            <option value="" disabled selected>Select shift</option>
-                            <option value="Day">Day</option>
-                            <option value="Night">Night</option>
-                        </select>
-                        <button type="button" onclick="resetShift(this)">Reset</button> <!-- Reset button -->
-                    </td>
-                </tr>
-                <tr>
-            </tbody>
-        </table>
-    </div>
-</form>
-    <!-- Add this script for calculating total hours -->
-    <script>
-        // Function to calculate total hours for each row
         function calculateTotalHours() {
-            const rows = document.querySelectorAll('#payrollTable tbody tr'); // Get all rows in the payroll table
-            
-            rows.forEach(row => {
-                const startTimeInput = row.querySelector('.start-time');
-                const endTimeInput = row.querySelector('.end-time');
+            document.querySelectorAll('#payrollTable tbody tr').forEach(row => {
+                const startTime = row.querySelector('.start-time').value;
+                const endTime = row.querySelector('.end-time').value;
                 const totalHoursCell = row.querySelector('.total-hours');
-                
-                // Only process rows that have start-time and end-time inputs
-                if (startTimeInput && endTimeInput && totalHoursCell) {
-                    const startTime = startTimeInput.value;
-                    const endTime = endTimeInput.value;
-    
-                    if (startTime && endTime) {
-                        const start = new Date(`1970-01-01T${startTime}:00`);
-                        const end = new Date(`1970-01-01T${endTime}:00`);
-                        
-                        if (end <= start){
-                            end.setDate(end.getDate()+1);
-                        }
-
-                        const hoursWorked = (end - start) / (1000 * 60 * 60); // Calculate difference in hours
-                        
-                        totalHoursCell.textContent = hoursWorked > 0 ? hoursWorked.toFixed(2) : 0; // Display total hours, or 0 if invalid
-                    } else {
-                        totalHoursCell.textContent = 0; // If no time entered, set total hours to 0
-                    }
-                }
-            });
-        }
-    
-        // Function to ensure all time inputs have event listeners
-        function addEventListeners() {
-            const timeInputs = document.querySelectorAll('.start-time, .end-time'); // Get all time inputs
-            timeInputs.forEach(input => {
-                input.removeEventListener('change', calculateTotalHours); // Remove any existing listeners (if necessary)
-                input.addEventListener('change', calculateTotalHours);    // Add new event listener
-            });
-        }
-
-        // Function to reset shift dropdown to placeholder state
-        function resetShift(button) {
-            const selectElement = button.previousElementSibling;
-            selectElement.value = ""; // Reset the dropdown to its default (placeholder) value
-        }
-    
-        // Add event listeners on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            addEventListeners();
-            calculateTotalHours(); // Initial calculation on load
-        });
-    </script>
-    
-           <!-- Separate buttons for actions -->
-    <div class="container mt-3">
-        <button id="generatePDF" class="btn btn-success">Download PDF</button>
-        <button type="submit" class="btn btn-primary" id="submitForm">Submit Form</button>
-    </div>
-    
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const canvas = document.getElementById('signature-pad');
-        const ctx = canvas.getContext('2d');
-
-    // Resize canvas for better resolution
-        function resizeCanvas() {
-            const ratio = Math.max(window.devicePixelRatio || 1, 1);
-            canvas.width = canvas.offsetWidth * ratio;
-            canvas.height = canvas.offsetHeight * ratio;
-            ctx.scale(ratio, ratio);
-        }
-        resizeCanvas();
-
-        let drawing = false;
-
-        function startDrawing(event) {
-            drawing = true;
-            ctx.beginPath();
-            ctx.moveTo(
-                event.clientX - canvas.getBoundingClientRect().left,
-                event.clientY - canvas.getBoundingClientRect().top
-            );
-            event.preventDefault(); // Prevent scrolling on touch devices
-        }
-
-        function draw(event) {
-            if (!drawing) return;
-            ctx.lineTo(
-                event.clientX - canvas.getBoundingClientRect().left,
-                event.clientY - canvas.getBoundingClientRect().top
-            );
-            ctx.stroke();
-            event.preventDefault(); // Prevent scrolling on touch devices
-        }
-
-        function stopDrawing(event) {
-            drawing = false;
-            event.preventDefault(); // Prevent scrolling on touch devices
-        }
-
-    // Add mouse event listeners for desktops
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDrawing);
-        canvas.addEventListener('mouseout', stopDrawing);
-
-    // Add touch event listeners for touch devices
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            startDrawing(e.touches[0]);
-        });
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            draw(e.touches[0]);
-        });
-        canvas.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            stopDrawing(e);
-        });
-        canvas.addEventListener('touchcancel', (e) => {
-            e.preventDefault();
-            stopDrawing(e);
-        });
-
-    // Function to clear only the signature
-        window.clearSignature = function () {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        };
-    });
-</script>
-
-
-    
-  <!-- JavaScript for PDF generation -->
-    <script>
-        // Function to update total values
-        function updateTotal() {
-            const unitInputs = document.querySelectorAll('.units'); // Get all unit inputs
-            let grandTotal = 0; // To store the sum of all totals
-
-            unitInputs.forEach(input => {
-                const pricePerUnit = parseFloat(input.getAttribute('data-price')); // Get the price per unit
-                const units = parseFloat(input.value) || 0; // Get the number of units
-                const total = pricePerUnit * units; // Calculate the total
-                grandTotal += total; // Add to grand total
-                input.closest('tr').querySelector('.total').textContent = `$${total.toFixed(2)}`; // Update the row total
-            });
-
-            // Update the grand total
-            document.getElementById('fieldTicketTotal').textContent = `$${grandTotal.toFixed(2)}`;
-        }
-        
-         // Function to auto-resize textarea based on content
-        document.querySelectorAll('textarea').forEach(textarea => {
-            textarea.style.overflowY = 'hidden'; // Hide vertical scrollbar
-            textarea.style.height = 'auto'; // Reset to auto
-            textarea.style.height = textarea.scrollHeight + 'px'; // Set height based on scroll height
-
-            textarea.addEventListener('input', function() {
-                this.style.height = 'auto'; // Reset the height to auto to allow for shrink
-                this.style.height = this.scrollHeight + 'px'; // Adjust height based on content
-            });
-        });
-
-
-        // PDF generation
-        document.getElementById('generatePDF').addEventListener('click', () => {
-            // Retrieve the user inputs for "Customer", "Ticket #", and "Rig #"
-            const customer = document.getElementById('customer').value.trim() || 'Customer';
-            const ticketNumber = document.getElementById('ticket').value.trim() || 'Ticket';
-            const rigNumber = document.getElementById('rig').value.trim() || 'Rig';
-
-            // Construct the filename using customer, ticket number, and rig number
-            const filename = `${customer}_${ticketNumber}_${rigNumber}_.pdf`.replace(/\s+/g, '_');
-
-            // Ensure all textareas expand to show full content
-            document.querySelectorAll('textarea').forEach(textarea => {
-                const content = textarea.value;
-                const textDiv = document.createElement('div');
-                textDiv.style.whiteSpace = 'pre-wrap';
-                textDiv.style.border = '1px solid #ced4da';
-                textDiv.style.padding = '5px';
-                textDiv.textContent = content;
-                textarea.replaceWith(textDiv);
-            });
-
-            const element = document.getElementById('fieldTicketForm');
-
-            // Configure html2pdf options
-            const opt = {
-                margin: 0.5,
-                filename: filename,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 2,
-                    scrollY: 0,
-                    useCORS: true,
-                    logging: true
-                },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-
-            // Function to check if the user is on an iOS device (iPhone or iPad)
-            function isIOS() {
-                return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-            }
-
-            // Generate the PDF with html2pdf and handle different behavior for iOS and non-iOS
-            html2pdf().from(element).set(opt).toPdf().get('pdf').then((pdf) => {
-                const blob = pdf.output('blob');
-
-                if (isIOS()) {
-                    // For iOS devices, convert Blob to Data URL and open it in a new tab
-                    const reader = new FileReader();
-                    reader.onloadend = function() {
-                        const pdfDataUrl = reader.result;
-                        window.open(pdfDataUrl, '_blank');
-                    };
-                    reader.readAsDataURL(blob);
+                if (startTime && endTime) {
+                    const start = new Date(`1970-01-01T${startTime}:00`);
+                    const end = new Date(`1970-01-01T${endTime}:00`);
+                    if (end <= start) end.setDate(end.getDate() + 1);
+                    const hoursWorked = (end - start) / (1000 * 60 * 60);
+                    totalHoursCell.textContent = hoursWorked > 0 ? hoursWorked.toFixed(2) : 0;
                 } else {
-                    // For other devices, create a Blob URL and trigger a download
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = filename;
-                    link.click();
-                    URL.revokeObjectURL(url); // Clean up the object URL after download
+                    totalHoursCell.textContent = 0;
                 }
-            }).then(() => {
-                // Convert divs back to textareas after the PDF is generated
-                document.querySelectorAll('div[style*="white-space"]').forEach(div => {
-                    const textarea = document.createElement('textarea');
-                    textarea.className = 'form-control';
-                    textarea.value = div.textContent;
-                    div.replaceWith(textarea);
-                });
             });
-        });
-    </script>
+        }
 
-    <script>
-        document.querySelectorAll('textarea').forEach(textarea => {
-            textarea.addEventListener('input', function() {
-                this.style.height = 'auto'; // Reset the height to auto
-                this.style.height = (this.scrollHeight) + 'px'; // Adjust height based on content
+        function setupEventListeners() {
+            document.querySelectorAll('.start-time, .end-time').forEach(input => {
+                input.addEventListener('change', calculateTotalHours);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            updateTotal();
+            calculateTotalHours();
+
+            const generatePDF = document.getElementById('generatePDF');
+            generatePDF.addEventListener('click', () => {
+                const filename = `${document.getElementById('customer').value || 'Customer'}_${document.getElementById('ticket').value || 'Ticket'}_${document.getElementById('rig').value || 'Rig'}.pdf`;
+                const element = document.getElementById('fieldTicketForm');
+                const opt = {
+                    margin: 0.5,
+                    filename,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, scrollY: 0, useCORS: true, logging: true },
+                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                };
+
+                html2pdf().from(element).set(opt).save();
             });
         });
     </script>
-    
-    <!-- Bootstrap JS (optional) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
