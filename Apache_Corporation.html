@@ -178,7 +178,9 @@
             word-wrap: break-word;
             resize: none; /* Disable manual resizing */
         }
-    
+        #signature-pad {
+        touch-action: none; /* Disable touch actions like scrolling on this element */
+        }
     </style>
 </head>
 <body>
@@ -762,75 +764,74 @@
     
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-    const canvas = document.getElementById('signature-pad');
-    const ctx = canvas.getContext('2d');
+        const canvas = document.getElementById('signature-pad');
+        const ctx = canvas.getContext('2d');
 
     // Resize canvas for better resolution
-    function resizeCanvas() {
-        const ratio = Math.max(window.devicePixelRatio || 1, 1);
-        canvas.width = canvas.offsetWidth * ratio;
-        canvas.height = canvas.offsetHeight * ratio;
-        ctx.scale(ratio, ratio);
-    }
-    resizeCanvas();
+        function resizeCanvas() {
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            ctx.scale(ratio, ratio);
+        }
+        resizeCanvas();
 
-    let drawing = false;
+        let drawing = false;
 
-    function startDrawing(event) {
-        drawing = true;
-        ctx.beginPath();
-        ctx.moveTo(
-            event.clientX - canvas.getBoundingClientRect().left,
-            event.clientY - canvas.getBoundingClientRect().top
-        );
-        event.preventDefault(); // Prevent scrolling on touch devices
-    }
+        function startDrawing(event) {
+            drawing = true;
+            ctx.beginPath();
+            ctx.moveTo(
+                event.clientX - canvas.getBoundingClientRect().left,
+                event.clientY - canvas.getBoundingClientRect().top
+            );
+            event.preventDefault(); // Prevent scrolling on touch devices
+        }
 
-    function draw(event) {
-        if (!drawing) return;
-        ctx.lineTo(
-            event.clientX - canvas.getBoundingClientRect().left,
-            event.clientY - canvas.getBoundingClientRect().top
-        );
-        ctx.stroke();
-        event.preventDefault(); // Prevent scrolling on touch devices
-    }
+        function draw(event) {
+            if (!drawing) return;
+            ctx.lineTo(
+                event.clientX - canvas.getBoundingClientRect().left,
+                event.clientY - canvas.getBoundingClientRect().top
+            );
+            ctx.stroke();
+            event.preventDefault(); // Prevent scrolling on touch devices
+        }
 
-    function stopDrawing(event) {
-        drawing = false;
-        event.preventDefault(); // Prevent scrolling on touch devices
-    }
+        function stopDrawing(event) {
+            drawing = false;
+            event.preventDefault(); // Prevent scrolling on touch devices
+        }
 
-    // Add mouse event listeners for drawing on desktops
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('mouseout', stopDrawing);
+    // Add mouse event listeners for desktops
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
 
-    // Add touch event listeners for drawing on touch devices
-    canvas.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        startDrawing(e.touches[0]);
-    });
-    canvas.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-        draw(e.touches[0]);
-    });
-    canvas.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        stopDrawing(e);
-    });
-    canvas.addEventListener('touchcancel', (e) => {
-        e.preventDefault();
-        stopDrawing(e);
-    });
+    // Add touch event listeners for touch devices
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startDrawing(e.touches[0]);
+        });
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            draw(e.touches[0]);
+        });
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            stopDrawing(e);
+        });
+        canvas.addEventListener('touchcancel', (e) => {
+            e.preventDefault();
+            stopDrawing(e);
+        });
 
     // Function to clear only the signature
-    window.clearSignature = function () {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-    };
-});
-
+        window.clearSignature = function () {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        };
+    });
 </script>
 
 
