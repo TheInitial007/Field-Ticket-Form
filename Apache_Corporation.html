@@ -876,7 +876,7 @@
             const rigNumber = document.getElementById('rig').value.trim() || 'Rig';
 
             // Construct the filename using customer, ticket number, and rig number
-            const filename = `${customer}_${ticketNumber}_${rigNumber}_.pdf`.replace(/\s+/g, '_');
+            const filename = `${customer}_${ticketNumber}_${rigNumber}.pdf`.replace(/\s+/g, '_');
 
             // Ensure all textareas expand to show full content
             document.querySelectorAll('textarea').forEach(textarea => {
@@ -901,7 +901,7 @@
                     scrollY: 0,
                     useCORS: true,
                     logging: true
-                },
+                },    
                 jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
 
@@ -915,11 +915,16 @@
                 const blob = pdf.output('blob');
 
                 if (isIOS()) {
-                    // For iOS devices, convert Blob to Data URL and open it in a new tab
+                    // For iOS devices, create a Blob URL and open it directly.
                     const reader = new FileReader();
                     reader.onloadend = function() {
                         const pdfDataUrl = reader.result;
-                        window.open(pdfDataUrl, '_blank');
+
+                        // Create a temporary link for download
+                        const link = document.createElement('a');
+                        link.href = pdfDataUrl;
+                        link.download = filename;
+                        link.click();
                     };
                     reader.readAsDataURL(blob);
                 } else {
@@ -928,7 +933,9 @@
                     const link = document.createElement('a');
                     link.href = url;
                     link.download = filename;
+                    document.body.appendChild(link); // Append to body to make it work in all browsers
                     link.click();
+                    document.body.removeChild(link); // Clean up the link after download
                     URL.revokeObjectURL(url); // Clean up the object URL after download
                 }
             }).then(() => {
