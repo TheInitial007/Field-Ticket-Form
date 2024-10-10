@@ -838,7 +838,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     
- <!-- JavaScript for PDF generation -->
+<!-- JavaScript for PDF generation -->
 <script>
     // Function to update total values
     function updateTotal() {
@@ -899,8 +899,17 @@
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-            // Add the image to the PDF
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            // If content is taller than a single PDF page, split into multiple pages
+            let imgY = 0;
+            const pageHeight = pdf.internal.pageSize.getHeight();
+
+            while (imgY < pdfHeight) {
+                pdf.addImage(imgData, 'PNG', 0, -imgY, pdfWidth, pdfHeight);
+                imgY += pageHeight;
+                if (imgY < pdfHeight) {
+                    pdf.addPage();
+                }
+            }
 
             // Check if the device is iOS (iPhone or iPad)
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -918,7 +927,7 @@
         });
     });
 </script>
-
+    
     <script>
         document.querySelectorAll('textarea').forEach(textarea => {
             textarea.addEventListener('input', function() {
