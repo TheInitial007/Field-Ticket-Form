@@ -876,6 +876,18 @@
         // Construct the filename using customer, ticket number, and rig number
         const filename = `${customer}_${ticketNumber}_${rigNumber}.pdf`.replace(/\s+/g, '_');
 
+        // Convert textarea to div with content to ensure wrapping
+    document.querySelectorAll('textarea').forEach(textarea => {
+        const content = textarea.value;
+        const textDiv = document.createElement('div');
+        textDiv.style.whiteSpace = 'pre-wrap'; // Ensure text wrapping
+        textDiv.style.wordWrap = 'break-word'; // Break long words
+        textDiv.style.border = '1px solid #ced4da'; // Style to match textarea
+        textDiv.style.padding = '5px'; // Add padding for spacing
+        textDiv.textContent = content; // Set the content
+        textarea.replaceWith(textDiv); // Replace textarea with div
+    });
+        
         // Get the form element to convert to PDF
         const element = document.getElementById('fieldTicketForm');
 
