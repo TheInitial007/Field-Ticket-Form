@@ -160,7 +160,7 @@
             width: 10%; /* Decrease width of the "Time" columns */
         }
 
-        /* Make the input field text wrap */
+       /* Make the input field text wrap */
         input.form-control {
             white-space: normal; /* Enable wrapping */
             word-wrap: break-word; /* Wrap long words if needed */
@@ -174,9 +174,13 @@
             min-height: 50px; /* Ensure minimum height */
             max-height: none; /* Disable max height restrictions */
             white-space: pre-wrap; /* Preserve white spaces */
+            overflow-wrap: break-word;
             overflow: visible !important; /* Force overflow to be visible */
             word-wrap: break-word;
             resize: none; /* Disable manual resizing */
+        }
+        #signature-pad {
+        touch-action: none; /* Disable touch actions like scrolling on this element */
         }
     
     </style>
@@ -338,48 +342,42 @@
                         SERVICE AND RENTAL
                     </th>
                 </tr>
-                <tr>
+               <tr>
                     <td>Transportation</td>
                     <td><input type="number" class="units" data-price="600.00" onchange="updateTotal()"></td>
                     <td>$600.00</td>
                     <td class="total">$0.00</td>
-                </tr>
-                <tr>
+               </tr>
+               <tr>
                     <td>Laydown Machine</td>
                     <td><input type="number" class="units" data-price="1750.00" onchange="updateTotal()"></td>
                     <td>$1,750.00</td>
                     <td class="total">$0.00</td>
-                </tr>
-                <tr>
+               </tr>
+               <tr>
                     <td>Base Beam</td>
                     <td><input type="number" class="units" data-price="1000.00" onchange="updateTotal()"></td>
                     <td>$1000.00</td>
                     <td class="total">$0.00</td>
-                </tr>
-                <tr>
+               </tr>
+               <tr>
                     <td>Rig Mat</td>
                     <td><input type="number" class="units" data-price="50.00" onchange="updateTotal()"></td>
                     <td>$50.00</td>
                     <td class="total">$0.00</td>
-                </tr>
-                <tr>
-                    <td>BOP</td>
-                    <td><input type="number" class="units" data-price="475.00" onchange="updateTotal()"></td>
-                    <td>$475.00</td>
-                    <td class="total">$0.00</td>
-                </tr>
-                <tr>
+               </tr>
+               <tr>
                     <td>Pipe Racks</td>
                     <td><input type="number" class="units" data-price="100.00" onchange="updateTotal()"></td>
                     <td>$100.00</td>
                     <td class="total">$0.00</td>
-                </tr>
+               </tr>
                <tr>
                     <td>Permints</td>
                     <td><input type="number" class="units" data-price="225.00" onchange="updateTotal()"></td>
                     <td>$225.00</td>
                     <td class="total">$0.00</td>
-                </tr>
+               </tr>
     
     
                 <!-- New Section: EXPENDABLE / SALE ITEMS -->
@@ -474,8 +472,10 @@
                     <td colspan="2">
                         <textarea class="form-control" placeholder="Enter description of work" style="width: 100%; height: 100px;"></textarea>
                     </td>
-                    <td colspan="2">
-                        <textarea class="form-control" placeholder="Enter company man approval" style="width: 100%; height: 100px;"></textarea>
+                    <td colspan="2" style="text-align: center;">
+                        <h5>Company Man Approval</h5>
+                        <canvas id="signature-pad" style="border: 1px solid #ccc; width: 100%; height: 150px;"></canvas>
+                        <button type="button" class="btn btn-danger mt-2" onclick="clearSignature()">Clear</button>
                     </td>
                 </tr>
             </tbody>
@@ -777,89 +777,184 @@
         <button type="submit" class="btn btn-primary" id="submitForm">Submit Form</button>
     </div>
 
-    
-  <!-- JavaScript for PDF generation -->
-    <script>
-        // Function to update total values
-        function updateTotal() {
-            const unitInputs = document.querySelectorAll('.units'); // Get all unit inputs
-            let grandTotal = 0; // To store the sum of all totals
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const canvas = document.getElementById('signature-pad');
+        const ctx = canvas.getContext('2d');
 
-            unitInputs.forEach(input => {
-                const pricePerUnit = parseFloat(input.getAttribute('data-price')); // Get the price per unit
-                const units = parseFloat(input.value) || 0; // Get the number of units
-                const total = pricePerUnit * units; // Calculate the total
-                grandTotal += total; // Add to grand total
-                input.closest('tr').querySelector('.total').textContent = `$${total.toFixed(2)}`; // Update the row total
-            });
-
-            // Update the grand total
-            document.getElementById('fieldTicketTotal').textContent = `$${grandTotal.toFixed(2)}`;
+    // Resize canvas for better resolution
+        function resizeCanvas() {
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            ctx.scale(ratio, ratio);
         }
+        resizeCanvas();
+
+        let drawing = false;
+
+        function startDrawing(event) {
+            drawing = true;
+            ctx.beginPath();
+            ctx.moveTo(
+                event.clientX - canvas.getBoundingClientRect().left,
+                event.clientY - canvas.getBoundingClientRect().top
+            );
+            event.preventDefault(); // Prevent scrolling on touch devices
+        }
+
+        function draw(event) {
+            if (!drawing) return;
+            ctx.lineTo(
+                event.clientX - canvas.getBoundingClientRect().left,
+                event.clientY - canvas.getBoundingClientRect().top
+            );
+            ctx.stroke();
+            event.preventDefault(); // Prevent scrolling on touch devices
+        }
+
+        function stopDrawing(event) {
+            drawing = false;
+            event.preventDefault(); // Prevent scrolling on touch devices
+        }
+
+    // Add mouse event listeners for desktops
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+    // Add touch event listeners for touch devices
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startDrawing(e.touches[0]);
+        });
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            draw(e.touches[0]);
+        });
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            stopDrawing(e);
+        });
+        canvas.addEventListener('touchcancel', (e) => {
+            e.preventDefault();
+            stopDrawing(e);
+        });
+
+    // Function to clear only the signature
+        window.clearSignature = function () {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        };
+    });
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    
+<!-- JavaScript for PDF generation -->
+<script>
+    // Function to update total values
+    function updateTotal() {
+        const unitInputs = document.querySelectorAll('.units'); // Get all unit inputs
+        let grandTotal = 0; // To store the sum of all totals
+
+        unitInputs.forEach(input => {
+            const pricePerUnit = parseFloat(input.getAttribute('data-price')); // Get the price per unit
+            const units = parseFloat(input.value) || 0; // Get the number of units
+            const total = pricePerUnit * units; // Calculate the total
+            grandTotal += total; // Add to grand total
+            input.closest('tr').querySelector('.total').textContent = `$${total.toFixed(2)}`; // Update the row total
+        });
+
+        // Update the grand total
+        document.getElementById('fieldTicketTotal').textContent = `$${grandTotal.toFixed(2)}`;
+    }
+
+    // Function to auto-resize textarea based on content
+    document.querySelectorAll('textarea').forEach(textarea => {
+        textarea.style.overflowY = 'hidden'; // Hide vertical scrollbar
+        textarea.style.height = 'auto'; // Reset to auto
+        textarea.style.height = textarea.scrollHeight + 'px'; // Set height based on scroll height
+
+        textarea.addEventListener('input', function () {
+            this.style.height = 'auto'; // Reset the height to auto to allow for shrink
+            this.style.height = this.scrollHeight + 'px'; // Adjust height based on content
+        });
+    });
+
+    // PDF generation
+    document.getElementById('generatePDF').addEventListener('click', () => {
+        const { jsPDF } = window.jspdf;
+
+        // Retrieve user inputs for "Customer", "Ticket #", and "Rig #"
+        const customer = document.getElementById('customer').value.trim() || 'Customer';
+        const ticketNumber = document.getElementById('ticket').value.trim() || 'Ticket';
+        const rigNumber = document.getElementById('rig').value.trim() || 'Rig';
+
+        // Construct the filename using customer, ticket number, and rig number
+        const filename = `${customer}_${ticketNumber}_${rigNumber}.pdf`.replace(/\s+/g, '_');
+
+        // Convert textarea to div with content to ensure wrapping
+    document.querySelectorAll('textarea').forEach(textarea => {
+        const content = textarea.value;
+        const textDiv = document.createElement('div');
+        textDiv.style.whiteSpace = 'pre-wrap'; // Ensure text wrapping
+        textDiv.style.wordWrap = 'break-word'; // Break long words
+        textDiv.style.border = '1px solid #ced4da'; // Style to match textarea
+        textDiv.style.padding = '5px'; // Add padding for spacing
+        textDiv.textContent = content; // Set the content
+        textarea.replaceWith(textDiv); // Replace textarea with div
+    });
         
-         // Function to auto-resize textarea based on content
-        document.querySelectorAll('textarea').forEach(textarea => {
-            textarea.style.overflowY = 'hidden'; // Hide vertical scrollbar
-            textarea.style.height = 'auto'; // Reset to auto
-            textarea.style.height = textarea.scrollHeight + 'px'; // Set height based on scroll height
+        // Get the form element to convert to PDF
+        const element = document.getElementById('fieldTicketForm');
 
-            textarea.addEventListener('input', function() {
-                this.style.height = 'auto'; // Reset the height to auto to allow for shrink
-                this.style.height = this.scrollHeight + 'px'; // Adjust height based on content
+        // Use html2canvas to capture the form
+        html2canvas(element, { scale: 2, useCORS: true }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+
+            // Create a new jsPDF instance with letter format
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'px',
+                format: 'a4'
             });
+
+            // Calculate image dimensions for the PDF
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+            // If content is taller than a single PDF page, split into multiple pages
+            let imgY = 0;
+            const pageHeight = pdf.internal.pageSize.getHeight();
+
+            while (imgY < pdfHeight) {
+                pdf.addImage(imgData, 'PNG', 0, -imgY, pdfWidth, pdfHeight);
+                imgY += pageHeight;
+                if (imgY < pdfHeight) {
+                    pdf.addPage();
+                }
+            }
+
+            // Check if the device is iOS (iPhone or iPad)
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+            // For iOS devices, open the PDF in a new tab
+            if (isIOS) {
+                pdf.output('dataurlnewwindow');
+            } else {
+                // For non-iOS devices, download the PDF
+                pdf.save(filename);
+            }
+        }).catch((error) => {
+            console.error('Error generating PDF:', error);
+            alert('An error occurred while generating the PDF. Please try again.');
         });
-
-
-        // PDF generation
-            document.getElementById('generatePDF').addEventListener('click', () => {
-                // Retrieve the user inputs for "Customer", "Ticket #", and "Rig #"
-                const customer = document.getElementById('customer').value.trim() || 'Customer'; // Get customer name, fallback to 'Customer' if empty
-                const ticketNumber = document.getElementById('ticket').value.trim() || 'Ticket'; // Get ticket number, fallback to 'Ticket' if empty
-                const rigNumber = document.getElementById('rig').value.trim() || 'Rig'; // Get rig number, fallback to 'Rig' if empty
-
-                // Construct the filename using customer, ticket number, and rig number
-                const filename = `${customer}_${ticketNumber}_${rigNumber}_.pdf`.replace(/\s+/g, '_'); // Replace spaces with underscores
-                
-        // Ensure all textareas expand to show full content
-            document.querySelectorAll('textarea').forEach(textarea => {
-                const content = textarea.value; // Get textarea content
-                const textDiv = document.createElement('div'); // Create a div to replace textarea
-                textDiv.style.whiteSpace = 'pre-wrap'; // Preserve line breaks and whitespace
-                textDiv.style.border = '1px solid #ced4da'; // Add a border to match textarea styling
-                textDiv.style.padding = '5px'; // Add padding to match the textarea
-                textDiv.textContent = content; // Set the div's text content to the textarea value
-                textarea.replaceWith(textDiv); // Replace textarea with the div
-            });
-
-            const element = document.getElementById('fieldTicketForm'); // Get form content
-
-        // Configure html2pdf options
-            const opt = {
-                margin: 0.5,
-                filename: filename,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 2, 
-                    scrollY: 0,  // Ensure content that is scrolled within the textarea is captured
-                    useCORS: true, 
-                    logging: true
-                },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-
-            // Generate and save the PDF
-            html2pdf().set(opt).from(element).save().then(() => {
-                // Convert divs back to textareas after the PDF is generated
-                document.querySelectorAll('div[style*="white-space"]').forEach(div => {
-                    const textarea = document.createElement('textarea');
-                    textarea.className = 'form-control'; // Reapply the textarea class
-                    textarea.value = div.textContent; // Set the value back from div
-                    div.replaceWith(textarea); // Replace the div with the original textarea
-                });
-            });
-        });
-    </script>
-
+    });
+</script>
+    
     <script>
         document.querySelectorAll('textarea').forEach(textarea => {
             textarea.addEventListener('input', function() {
